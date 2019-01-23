@@ -34,19 +34,20 @@ class Portfolio():
 
 	# Instantiate fully-convolutional ensemble of identical independent evaluators
 	def createEiieNet(self, inputTensor, rates):
+		K.set_image_data_format("channels_first")
 		mainInputShape = np.array(inputTensor).shape[1:]
 		weightInputShape = np.array(rates).shape[1:]
 		biasInputShape = (1, )
 
 		mIn = Input(shape=mainInputShape, name='mainInput')
-		x = Conv2D(2, (3, 1), data_format='channels_first')(mIn)
+		x = Conv2D(2, (3, 1))(mIn)
 		x = Activation('relu')(x)
-		x = Conv2D(20, (48, 1), data_format='channels_first')(x)
+		x = Conv2D(20, (48, 1))(x)
 		x = Activation('relu')(x)
 		wIn = Input(shape=weightInputShape, name='weightInput')
 		wInExp = Lambda(expandDims)(wIn)
 		x = Concatenate(axis=1)([x, wInExp])
-		x = Conv2D(1, (1, 1), data_format='channels_first')(x)
+		x = Conv2D(1, (1, 1))(x)
 		bIn = Input(shape=biasInputShape, name='biasInput')
 		bInExp = Lambda(expandDims)(bIn)
 		x = Concatenate(axis=3)([x, bInExp])
