@@ -2,7 +2,7 @@ import ccxt
 from time import time
 import numpy as np
 from matplotlib import pyplot as plt
-from random import random as rand 
+from random import random as rand
 from keras.models import *
 from keras.layers import *
 import keras.backend as K
@@ -10,7 +10,7 @@ from numpy.random import geometric
 import tensorflow as tf
 
 def expandDims(x):
-	expX = K.expand_dims(x, axis=1)	
+	expX = K.expand_dims(x, axis=1)
 	expX = K.expand_dims(expX, axis=1)
 	return expX
 
@@ -39,21 +39,21 @@ class Portfolio():
 		biasInputShape = (1, )
 
 		mIn = Input(shape=mainInputShape, name='mainInput')
-		x = Conv2D(2, (3, 1))(mIn)
+		x = Conv2D(2, (3, 1), data_format='channels_first')(mIn)
 		x = Activation('relu')(x)
-		x = Conv2D(20, (48, 1))(x)
+		x = Conv2D(20, (48, 1), data_format='channels_first')(x)
 		x = Activation('relu')(x)
-		wIn = Input(shape=weightInputShape, name='weightInput') 
+		wIn = Input(shape=weightInputShape, name='weightInput')
 		wInExp = Lambda(expandDims)(wIn)
 		x = Concatenate(axis=1)([x, wInExp])
-		x = Conv2D(1, (1, 1))(x)
+		x = Conv2D(1, (1, 1), data_format='channels_first')(x)
 		bIn = Input(shape=biasInputShape, name='biasInput')
 		bInExp = Lambda(expandDims)(bIn)
 		x = Concatenate(axis=3)([x, bInExp])
 		mOut = Activation('softmax')(x)
-	
-		self.model = Model([mIn, wIn, bIn], mOut) 
-		
+
+		self.model = Model([mIn, wIn, bIn], mOut)
+
 		# Instantiate custom symbolic gradient
 		mu = K.placeholder(shape=(None, 1), name='mu')
 		y = K.placeholder(shape=(None, len(self.symbols)), name='y')
@@ -62,12 +62,12 @@ class Portfolio():
 
 		yOutMult = tf.multiply(sqOut, y)
 		yOutBatchDot = tf.reduce_sum(yOutMult, axis=1, keep_dims=True)
-		muDotMult = tf.multiply(mu, yOutBatchDot)		
+		muDotMult = tf.multiply(mu, yOutBatchDot)
 
 		loss = -K.log(muDotMult)
 
 		grad = K.gradients(loss, self.model.trainable_weights)
-		self.getGradient = K.function(inputs=[mIn, wIn, bIn, mu, y, self.model.output], outputs=grad) 
+		self.getGradient = K.function(inputs=[mIn, wIn, bIn, mu, y, self.model.output], outputs=grad)
 
 		print('mIn shape: ' + str(mIn.get_shape().as_list()))
 		print('wIn shape: ' + str(wIn.get_shape().as_list()))
@@ -80,7 +80,7 @@ class Portfolio():
 		print('muDotMult shape: ' + str(muDotMult.get_shape().as_list()))
 		print('\nloss shape: ' + str(loss.get_shape().as_list()))
 		print('grad shape: ' + str([g.get_shape().as_list() for g in grad]))
-	
+
 	def printParams(self):
 		print('\nPortfolio parameters:')
 		print('\tfailure chance: ' + str(self.failureChance))
@@ -95,7 +95,7 @@ class Portfolio():
 		self.pvm = [[1.] + [0. for i in self.symbols[1:]] for j in (rates + rates[:1])]
 
 	# Determine change in weights and portfolio value due to price movement between trading periods
-	def updateRateShift(self, prevRates, curRates): 
+	def updateRateShift(self, prevRates, curRates):
 		xHat = np.divide([1.] + curRates, [1.] + prevRates)
 		values = [self.getValue() * w * x for w, x in zip(self.getWeights(), xHat)]
 
@@ -104,7 +104,7 @@ class Portfolio():
 
 		b = np.divide(values, self.getValue())
 		prevWeights = self.getWeights()
-		
+
 		self.setWeights(b)
 		return b, prevWeights, self.getValue()
 
@@ -119,34 +119,34 @@ class Portfolio():
 		pvmSeg = self.pvm[idx:idx + self.minibatchSize]
 
 		truncPvmSeg = [q[1:] for q in pvmSeg]
-		
+
 		mIn = np.array(inTensor[idx:idx + self.minibatchSize])
 		wIn = np.array(truncPvmSeg)
 		bIn = np.array([[1.0]] * self.minibatchSize)
-	
-		out = self.model.predict([mIn, wIn, bIn], batch_size=self.minibatchSize) 
+
+		out = self.model.predict([mIn, wIn, bIn], batch_size=self.minibatchSize)
 		squeezeOut = np.squeeze(out)
 
 		pP = [[1.] + list(r) for r in rates[idx - 1:idx + self.minibatchSize - 1]]
-		pC = [[1.] + list(r) for r in rates[idx:idx + self.minibatchSize]] 
-		pN = [[1.] + list(r) for r in rates[idx + 1:idx + self.minibatchSize + 1]] 
+		pC = [[1.] + list(r) for r in rates[idx:idx + self.minibatchSize]]
+		pN = [[1.] + list(r) for r in rates[idx + 1:idx + self.minibatchSize + 1]]
 
 		# Previous and current market relative price matrices
 		yP = np.divide(pC, pP)
-		yC = np.divide(pN, pC)	
-		
+		yC = np.divide(pN, pC)
+
 		wPrev = np.array(self.pvm[idx:idx + self.minibatchSize])
-		
+
 		wpNum = np.multiply(yP, wPrev)
 		wpDen = np.array([np.dot(ypT, wpT) for (ypT, wpT) in zip(yP, wPrev)])
 		wPrime = [np.divide(n, d) for (n, d) in zip(wpNum, wpDen)]
 
 		mu = [[self.calculateMu(wPT, wT, self.k)] for (wPT, wT) in zip(wPrime, squeezeOut)]
-		
-		grad = self.getGradient(inputs=[mIn, wIn, bIn, mu, yC, out])  
+
+		grad = self.getGradient(inputs=[mIn, wIn, bIn, mu, yC, out])
 
 		updates = [self.learningRate * g for g in grad]
-		
+
 		modelWeights = self.model.get_weights()
 		updateWeights = [np.add(wT, uT) for (wT, uT) in zip(modelWeights, updates)]
 		self.model.set_weights(updateWeights)
@@ -164,17 +164,17 @@ class Portfolio():
 				mIn = np.array([x])
 				wIn = np.array([np.squeeze(p[1:])])
 				bIn = np.array([1.])
-				modelOutput = self.model.predict([mIn, wIn, bIn])[0]	
+				modelOutput = self.model.predict([mIn, wIn, bIn])[0]
 
 				# Overwrite pvm at subsequent period
 				self.pvm[i + 2] = modelOutput[0][0]
-				
+
 				# Update portfolio for current timestep
-				newB, prevB, curValue = self.updateRateShift(rates[i], r) 
-				self.updatePortfolio(modelOutput[0][0], newB, curValue, rates[i], r) 
+				newB, prevB, curValue = self.updateRateShift(rates[i], r)
+				self.updatePortfolio(modelOutput[0][0], newB, curValue, rates[i], r)
 				if i % 1000 == 0:
 					print('\ti (' + str(i) + ') value: ' + str(self.getValue()))
-				 
+
 				# Train EIIE over minibatches of historical data
 				if i - self.minibatchSize >= 0:
 					for j in range(self.minibatchCount):
@@ -182,7 +182,7 @@ class Portfolio():
 						idx = self.getMinibatchInterval(i)
 						self.trainOnMinibatch(idx, inTensor, rates)
 			print('Epoch ' + str(epoch) + ' value: ' + str(self.getValue()))
-	
+
 	# Calculate current portfolio value and set portfolio weights
 	def updatePortfolio(self, newWeights, prevWeights, prevValue, prevRates, curRates):
 		# Calculate current portfolio value
@@ -190,7 +190,7 @@ class Portfolio():
 		prevValues = np.multiply(prevWeights, prevValue)
 		currentValues = np.multiply(rateRatios, prevValues)
 		currentVal = sum(currentValues)
-		
+
 		# Calculate difference between current and new weights
 		weightDelta = np.subtract(newWeights, self.weights)
 
@@ -221,22 +221,22 @@ class Portfolio():
 		# Simulate possiblility of trade failure
 		for i in range(1, len(realValDeltas)):
 			if rand() < self.failureChance:
-				realValDeltas[0] += realValDeltas[i] / self.tradePer	
+				realValDeltas[0] += realValDeltas[i] / self.tradePer
 				realValDeltas[i] = 0
-		
+
 
 		# Calculate new value
 		newValues = np.add(currentValues, realValDeltas)
 		newValue = sum(newValues)
 		self.setValue(newValue)
-	
+
 		self.setWeights(np.divide(newValues, newValue))
 
 
 	# Iteratively calculate the transaction remainder factor for the period
 	def calculateMu(self, wPrime, w, k):
 		# Calculate initial mu value
-		mu = self.tradeFee * sum([abs(wpI - wI) for wpI, wI in zip(wPrime, w)]) 	
+		mu = self.tradeFee * sum([abs(wpI - wI) for wpI, wI in zip(wPrime, w)])
 
 		# Calculate iteration of mu
 		for i in range(k):
@@ -358,7 +358,7 @@ for sym in symbols:
 	else:
 		print('Data invalid for ' + sym + '!!!')
 	data.append(symData)
-	
+
 tData = truncateData(data)
 checkTruncData(tData)
 fData = formatData(tData, False)
@@ -368,7 +368,7 @@ x, y, rates = formatDataForInput(fData, window)
 if holdBtc:
 	symbols.insert(0, 'BTC/BTC')
 
-b = [1.] + [0.] * (len(symbols) - 1)  
+b = [1.] + [0.] * (len(symbols) - 1)
 pBeta = 0.00005
 k = 15
 learningRate = 0.00019
