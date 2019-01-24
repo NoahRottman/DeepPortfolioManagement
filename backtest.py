@@ -3,6 +3,7 @@ from time import time
 import numpy as np
 from matplotlib import pyplot as plt
 from random import random as rand
+import keras
 from keras.models import *
 from keras.layers import *
 import keras.backend as K
@@ -32,21 +33,56 @@ class Portfolio():
 		self.noop = noop
 		self.failureChance = failureChance
 
+	def createEiieNetXXX(self, inputTensor, rates):
+
+		model = Sequential()
+		model.add(Conv2D(2, (3,1), activation= 'relu'))
+		model.add(Conv2D(20, (48,1), activation= 'relu'))
+		model.add(Conv2D(1, (1,1)))
+		keras.activations.softmax(x, axis=1)
+
+		mu = K.placeholder(shape=(None, 1), name='mu')
+		y = K.placeholder(shape=(None, len(self.symbols)), name='y')
+
+		sqOut = K.squeeze(K.squeeze(self.model.output, 1), 1)
+
+		yOutMult = tf.multiply(sqOut, y)
+		yOutBatchDot = tf.reduce_sum(yOutMult, axis=1, keep_dims=True)
+		muDotMult = tf.multiply(mu, yOutBatchDot)
+
+		loss = -K.log(muDotMult)
+
+		grad = K.gradients(loss, self.model.trainable_weights)
+		self.getGradient = K.function(inputs=[mIn, wIn, bIn, mu, y, self.model.output], outputs=grad)
+
+		print('mIn shape: ' + str(mIn.get_shape().as_list()))
+		print('wIn shape: ' + str(wIn.get_shape().as_list()))
+		print('bIn shape: ' + str(bIn.get_shape().as_list()))
+		print('mu shape: ' + str(mu.get_shape().as_list()))
+		print('y shape: ' + str(y.get_shape().as_list()))
+		print('sqOut shape: ' + str(sqOut.get_shape().as_list()))
+		print('\nyOutMult shape: ' + str(yOutMult.get_shape().as_list()))
+		print('yOutBatchDot shape: ' + str(yOutBatchDot.get_shape().as_list()))
+		print('muDotMult shape: ' + str(muDotMult.get_shape().as_list()))
+		print('\nloss shape: ' + str(loss.get_shape().as_list()))
+		print('grad shape: ' + str([g.get_shape().as_list() for g in grad]))
+
 	# Instantiate fully-convolutional ensemble of identical independent evaluators
 	def createEiieNet(self, inputTensor, rates):
+		K.set_image_data_format("channels_first")
 		mainInputShape = np.array(inputTensor).shape[1:]
 		weightInputShape = np.array(rates).shape[1:]
 		biasInputShape = (1, )
 
 		mIn = Input(shape=mainInputShape, name='mainInput')
-		x = Conv2D(2, (3, 1), data_format='channels_first')(mIn)
+		x = Conv2D(2, (3, 1))(mIn)
 		x = Activation('relu')(x)
-		x = Conv2D(20, (48, 1), data_format='channels_first')(x)
+		x = Conv2D(20, (48, 1))(x)
 		x = Activation('relu')(x)
 		wIn = Input(shape=weightInputShape, name='weightInput')
 		wInExp = Lambda(expandDims)(wIn)
 		x = Concatenate(axis=1)([x, wInExp])
-		x = Conv2D(1, (1, 1), data_format='channels_first')(x)
+		x = Conv2D(1, (1, 1))(x)
 		bIn = Input(shape=biasInputShape, name='biasInput')
 		bInExp = Lambda(expandDims)(bIn)
 		x = Concatenate(axis=3)([x, bInExp])
