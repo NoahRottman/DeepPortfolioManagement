@@ -1,0 +1,132 @@
+Using TensorFlow backend.
+
+Portfolio symbols: ['EOS/BTC', 'ETH/BTC', 'ETC/BTC', 'TRX/BTC', 'ICX/BTC', 'XRP/BTC', 'XLM/BTC', 'NEO/BTC', 'LTC/BTC', 'ADA/BTC']
+Managing 10 alts in each portfolio
+Holding BTC: True
+
+Getting data for symbol: EOS/BTC
+Final data len: 10000
+Data valid for EOS/BTC
+
+Getting data for symbol: ETH/BTC
+Final data len: 10000
+Data valid for ETH/BTC
+
+Getting data for symbol: ETC/BTC
+Final data len: 10000
+Data valid for ETC/BTC
+
+Getting data for symbol: TRX/BTC
+Final data len: 10000
+Data valid for TRX/BTC
+
+Getting data for symbol: ICX/BTC
+Final data len: 10000
+Data valid for ICX/BTC
+
+Getting data for symbol: XRP/BTC
+Final data len: 10000
+Data valid for XRP/BTC
+
+Getting data for symbol: XLM/BTC
+Final data len: 10000
+Data valid for XLM/BTC
+
+Getting data for symbol: NEO/BTC
+Final data len: 10000
+Data valid for NEO/BTC
+
+Getting data for symbol: LTC/BTC
+Final data len: 10000
+Data valid for LTC/BTC
+
+Getting data for symbol: ADA/BTC
+Final data len: 10000
+Data valid for ADA/BTC
+Truncated data len: 10000
+			Timestamps synchronized
+pre-formatted data shape: (10, 10000, 6)
+2019-01-29 13:15:43.275146: I tensorflow/core/platform/cpu_feature_guard.cc:137] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+2019-01-29 13:15:43.363058: I tensorflow/stream_executor/cuda/cuda_gpu_executor.cc:895] successful NUMA node read from SysFS had negative value (-1), but there must be at least one NUMA node, so returning NUMA node zero
+2019-01-29 13:15:43.363291: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1105] Found device 0 with properties: 
+name: GeForce GTX 1070 major: 6 minor: 1 memoryClockRate(GHz): 1.7845
+pciBusID: 0000:01:00.0
+totalMemory: 7.93GiB freeMemory: 7.49GiB
+2019-01-29 13:15:43.363304: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1195] Creating TensorFlow device (/device:GPU:0) -> (device: 0, name: GeForce GTX 1070, pci bus id: 0000:01:00.0, compute capability: 6.1)
+mIn shape: [None, 3, 50, 10]
+wIn shape: [None, 10]
+bIn shape: [None, 1]
+mu shape: [None, 1]
+y shape: [None, 11]
+sqOut shape: [None, 11]
+
+yOutMult shape: [None, 11]
+yOutBatchDot shape: [None, 1]
+muDotMult shape: [None, 1]
+
+loss shape: [None, 1]
+grad shape: [[3, 1, 3, 2], [2], [48, 1, 2, 20], [20], [1, 1, 21, 1], [1]]
+
+Beginning epoch 0
+	i (0) value: 0.9990788573186733
+	i (1000) value: 0.9963638563534856
+	i (2000) value: 0.9778779308792089
+	i (3000) value: 0.9899506313039165
+	i (4000) value: 0.9897539154456292
+	i (5000) value: 1.0067328551257582
+	i (6000) value: 1.0107142012320587
+	i (7000) value: 0.990082288218727
+	i (8000) value: 1.0075398939444018
+	i (9000) value: 0.9960985412631561
+Epoch 0 value: 1.0005828807548791
+
+Beginning epoch 1
+	i (0) value: 0.9990787856843529
+	i (1000) value: 0.996126952283064
+	i (2000) value: 0.9776280326275328
+	i (3000) value: 0.9894830412178155
+	i (4000) value: 0.9892474920166041
+	i (5000) value: 1.0061866296428985
+	i (6000) value: 1.0100761424965277
+	i (7000) value: 0.9893368857568282
+	i (8000) value: 1.0064583347925091
+	i (9000) value: 0.9949011767193146
+Epoch 1 value: 0.9991890261961425
+
+Beginning epoch 2
+	i (0) value: 0.9990787130444553
+	i (1000) value: 0.9961266044116057
+	i (2000) value: 0.9776149991972745
+	i (3000) value: 0.9894485489198138
+	i (4000) value: 0.9892046508256275
+	i (5000) value: 1.006147970101752
+	i (6000) value: 1.0100267156899856
+	i (7000) value: 0.9892761834818304
+	i (8000) value: 1.0063799004284395
+	i (9000) value: 0.9948064944215019
+Epoch 2 value: 0.9990812550870397
+
+Beginning epoch 3
+	i (0) value: 0.9990786400470194
+	i (1000) value: 0.9961233526333243
+	i (2000) value: 0.9776037476379302
+	i (3000) value: 0.9894195638093248
+	i (4000) value: 0.989165419772313
+	i (5000) value: 1.0061157874930837
+	i (6000) value: 1.0099903008695312
+	i (7000) value: 0.989227619106569
+	i (8000) value: 1.006324068075283
+	i (9000) value: 0.9947397428091722
+Epoch 3 value: 0.9990090323598544
+
+Beginning epoch 4
+	i (0) value: 0.9990785659546219
+	i (1000) value: 0.996119158314125
+	i (2000) value: 0.9775919855418931
+	i (3000) value: 0.9893897500748006
+	i (4000) value: 0.9891252952615582
+	i (5000) value: 1.0060823845143358
+	i (6000) value: 1.0099528328714547
+	i (7000) value: 0.9891776259494802
+	i (8000) value: 1.0062662907215445
+
